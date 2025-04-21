@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ad Blocked Keywords Portal</title>
+  <link rel="stylesheet" href="options.css">
+  <style>
+    /* You can include additional styles here if needed */
+    #keyword-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    #keyword-list li {
+      padding: 5px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ccc;
+    }
+    #keyword-list li button {
+      margin-left: 10px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ad Blocked Keywords Portal</h1>
+  <section id="keyword-portal">
+    <h2>Currently Blocked Keywords</h2>
+    <ul id="keyword-list">
+      <!-- List items will be injected here -->
+    </ul>
+  </section>
+  <section id="add-keyword">
+    <h2>Add a New Keyword</h2>
+    <form id="add-keyword-form">
+      <input type="text" id="new-keyword" placeholder="Enter new keyword" required>
+      <button type="submit">Add Keyword</button>
+    </form>
+  </section>
+  <p id="status"></p>
+  <script>
+    // When the page loads, restore the custom filter keywords from storage.
+    document.addEventListener('DOMContentLoaded', restoreKeywords);
+    document.getElementById('add-keyword-form').addEventListener('submit', addKeyword);
+
+    // Function to load and display custom filter keywords.
+    function restoreKeywords() {
+      chrome.storage.sync.get({ options: { customFilterKeywords: [] } }, function(result) {
+        const options = result.options;
+        const keywordList = document.getElementById('keyword-list');
+        keywordList.innerHTML = '';
+        options.customFilterKeywords.forEach((keyword, index) => {
+          const li = document.createElement('li');
+          li.textContent = keyword;
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = 'Remove';
+          removeBtn.addEventListener('click', function() {
+            removeKeyword(index);
+          });
+          li.appendChild(removeBtn);
+          keywordList.appendChild(li);
+        });
+      });
+    }
+
+    // Function to add a new keyword.
+    function addKeyword(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-keyword');
+      const newKeyword = input.value.trim();
+      if (!newKeyword) return;
+      chrome.storage.sync.get({ options: { customFilterKeywords: [] } }, function(result) {
+        const options = result.options;
+        // Avoid duplicates.
+        if (!options.customFilterKeywords.includes(newKeyword)) {
+          options.customFilterKeywords.push(newKeyword);
+          chrome.storage.sync.set({ options: options }, function() {
+            document.getElementById('status').textContent = 'Keyword added.';
+            restoreKeywords();
+            input.value = '';
+          });
+        } else {
+          document.getElementById('status').textContent = 'Keyword already exists.';
+        }
+      });
+    }
+
+    // Function to remove a keyword by index.
+    function removeKeyword(index) {
+      chrome.storage.sync.get({ options: { customFilterKeywords: [] } }, function(result) {
+        const options = result.options;
+        options.customFilterKeywords.splice(index, 1);
+        chrome.storage.sync.set({ options: options }, function() {
+          document.getElementById('status').textContent = 'Keyword removed.';
+          restoreKeywords();
+        });
+      });
+    }
+  </script>
+</body>
+</html>

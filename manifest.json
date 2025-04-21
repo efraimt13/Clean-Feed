@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Clean Feed",
+  "version": "2.0",
+  "description": "Ultra-sophisticated YouTube cleaner that blocks ads, YouTube Shorts, and filters content via advanced title analysis.",
+  "permissions": [
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHost",
+    "declarativeNetRequestFeedback",
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.googlevideo.com/*",
+    "*://*.ytimg.com/*",
+    "*://*.googleadservices.com/*",
+    "*://*.doubleclick.net/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "options_page": "options.html",
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon48.png"
+  },
+  "homepage_url": "https://example.com/clean-feed"
+}
